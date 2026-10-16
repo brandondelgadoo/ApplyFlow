@@ -2,4 +2,4 @@
 
 - lucianadicampli03
 - brandondelgadoo
--veronica-lab
+- veronica-lab
