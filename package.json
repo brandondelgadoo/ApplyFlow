@@ -1,0 +1,14 @@
+{
+  "name": "applyflow",
+  "private": true,
+  "packageManager": "pnpm@12.10.1",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter web --filter extension dev",
+    "dev:web": "pnpm --filter web dev",
+    "dev:extension": "pnpm --filter extension dev",
+    "build": "pnpm --filter web --filter extension build"
+  }
+}

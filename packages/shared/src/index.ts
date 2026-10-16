@@ -1,0 +1,4 @@
+// Shared code used by both apps/web and apps/extension.
+// Import it with: import { APPLICATION_STATUSES } from "@applyflow/shared";
+
+export * from "./statuses";
