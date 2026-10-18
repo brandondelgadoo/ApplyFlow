@@ -59,7 +59,7 @@ pnpm -v
    pnpm install
    ```
 
-3. Copy the settings template. The fake values are fine for now; we'll add real Supabase keys in a later issue.
+3. Copy the settings template. The fake values are enough to run the apps; see [Database](#database) for the real Dev values.
 
    ```bash
    cp .env.example apps/web/.env.local
@@ -91,12 +91,15 @@ Both apps get the statuses from `packages/shared/src/statuses.ts`. Change that f
 
 Run these from the repo root.
 
-| Command                 | What it does                            |
-| ----------------------- | --------------------------------------- |
-| `pnpm dev`              | Start the website and the extension     |
-| `pnpm dev:web`          | Start only the website                  |
-| `pnpm dev:extension`    | Start only the extension                |
-| `pnpm build`            | Production build of both apps           |
+| Command                 | What it does                                          |
+| ----------------------- | ----------------------------------------------------- |
+| `pnpm dev`              | Start the website and the extension                   |
+| `pnpm dev:web`          | Start only the website                                |
+| `pnpm dev:extension`    | Start only the extension                              |
+| `pnpm build`            | Production build of both apps                         |
+| `pnpm db:new <name>`    | Create a new migration file                           |
+| `pnpm db:push`          | Push merged migrations to Dev (Brandon / API/DB only) |
+| `pnpm db:types`         | Regenerate database types from Dev                    |
 
 ## npm → pnpm cheat sheet
 
@@ -122,3 +125,68 @@ Don't use `npm` in this repo; it creates a `package-lock.json` that conflicts wi
 
 `.env.example` lists every setting with fake values. Real values go in `.env.local` files, which Git ignores.
 Never commit real keys, and never use `SUPABASE_SERVICE_ROLE_KEY` in browser or extension code.
+
+## Database
+
+The database runs on [Supabase](https://supabase.com). There are two projects, **Dev** and **Prod**.
+Everything below is for **Dev only**. Never link to or push to Prod.
+
+### Get the Dev values
+
+Ask Brandon for the Dev project URL and anon key in a private message (not in an issue, PR, or group chat).
+Put them in `apps/web/.env.local`:
+
+```ini
+NEXT_PUBLIC_SUPABASE_URL=https://<dev-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<dev anon key>
+```
+
+Leave `SUPABASE_SERVICE_ROLE_KEY` as the placeholder; that key isn't shared.
+`apps/web/.env.local` is ignored by Git. **Never commit it**, and never paste its contents anywhere public.
+
+### Link the Supabase CLI
+
+The Supabase CLI comes with `pnpm install`. You need a Supabase account that Brandon has added to the team.
+From the repo root:
+
+```bash
+pnpm supabase login
+pnpm supabase link --project-ref <dev-ref>
+```
+
+`<dev-ref>` is the Dev project's ref: the part before `.supabase.co` in the Dev URL.
+Only ever link the **Dev** project, never Prod.
+
+### Change the schema
+
+**Never create or edit tables in the Supabase dashboard.** Every change (tables, columns, policies, functions) goes
+through a migration file in a PR. Dashboard changes skip review and never reach a migration, so Dev and Prod drift apart.
+
+1. Create a migration:
+
+   ```bash
+   pnpm db:new add_applications_table
+   ```
+
+   This creates `supabase/migrations/<timestamp>_add_applications_table.sql`. Write your SQL in that file.
+
+2. Open a PR with the migration, like any other change.
+
+3. After the PR is merged, Brandon or a member of the API/DB team pushes it to Dev:
+
+   ```bash
+   pnpm db:push
+   ```
+
+   Migrations are only pushed after their PR is merged. Don't run `db:push` from your own branch.
+
+### Regenerate types
+
+After a schema change has been pushed to Dev, regenerate the TypeScript types and commit the result in a PR:
+
+```bash
+pnpm db:types
+```
+
+This reads the schema from the linked Dev project and writes `packages/shared/src/database.types.ts`,
+so it only picks up migrations that have already been pushed.

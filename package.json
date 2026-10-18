@@ -9,6 +9,12 @@
     "dev": "pnpm --parallel --filter web --filter extension dev",
     "dev:web": "pnpm --filter web dev",
     "dev:extension": "pnpm --filter extension dev",
-    "build": "pnpm --filter web --filter extension build"
+    "build": "pnpm --filter web --filter extension build",
+    "db:new": "supabase migration new",
+    "db:push": "supabase db push",
+    "db:types": "supabase gen types typescript --linked > packages/shared/src/database.types.ts"
+  },
+  "devDependencies": {
+    "supabase": "^2.121.0"
   }
 }
