@@ -1,3 +1,9 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+peerDependencyRules:
+  allowedVersions:
+    # eslint-plugin-react only lists ESLint up to 9 as supported, but its
+    # recommended rules work on ESLint 10 (see the note in eslint.config.mjs).
+    eslint-plugin-react>eslint: "10"

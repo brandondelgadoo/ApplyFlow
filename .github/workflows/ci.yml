@@ -1,0 +1,48 @@
+# Runs our code checks on every pull request and on every push to main.
+# These are the same checks as `pnpm check`, so run that before pushing.
+# Docs: https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# This workflow only needs to read the code.
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v7
+
+      # No version given, so it uses "packageManager" from package.json.
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Install Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      # --frozen-lockfile fails if pnpm-lock.yaml doesn't match package.json,
+      # so CI installs exactly what's in the lockfile.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type check
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test

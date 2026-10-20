@@ -1,0 +1,11 @@
+# Code owners are asked to review every PR that changes the paths below.
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Database migrations and Supabase config
+/supabase/ @brandondelgadoo
+
+# Website API routes
+/apps/web/app/api/ @brandondelgadoo
+
+# Shared schemas used by the website and the extension
+/packages/shared/schemas/ @brandondelgadoo
