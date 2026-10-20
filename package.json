@@ -12,9 +12,25 @@
     "build": "pnpm --filter web --filter extension build",
     "db:new": "supabase migration new",
     "db:push": "supabase db push",
-    "db:types": "supabase gen types typescript --linked > packages/shared/src/database.types.ts"
+    "db:types": "supabase gen types typescript --linked > packages/shared/src/database.types.ts",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "pnpm -r typecheck",
+    "test": "vitest run",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test"
   },
   "devDependencies": {
-    "supabase": "^2.121.0"
+    "@eslint/js": "^10.0.1",
+    "@next/eslint-plugin-next": "16.4.2",
+    "eslint": "^10.13.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.10",
+    "supabase": "^2.121.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.71.2",
+    "vitest": "^5.0.5"
   }
 }

@@ -97,9 +97,32 @@ Run these from the repo root.
 | `pnpm dev:web`          | Start only the website                                |
 | `pnpm dev:extension`    | Start only the extension                              |
 | `pnpm build`            | Production build of both apps                         |
+| `pnpm check`            | Run all the code checks (see below)                   |
+| `pnpm format`           | Format every file with Prettier                       |
 | `pnpm db:new <name>`    | Create a new migration file                           |
 | `pnpm db:push`          | Push merged migrations to Dev (Brandon / API/DB only) |
 | `pnpm db:types`         | Regenerate database types from Dev                    |
+
+## Code checks
+
+Every pull request, and every push to `main`, runs these checks on GitHub. Only merge a PR when they pass.
+
+| Check  | Command             | What it catches                               |
+| ------ | ------------------- | --------------------------------------------- |
+| Format | `pnpm format:check` | Files that aren't formatted with Prettier     |
+| Lint   | `pnpm lint`         | Likely bugs, found by ESLint                  |
+| Types  | `pnpm typecheck`    | TypeScript errors in every package            |
+| Tests  | `pnpm test`         | Failing tests (files ending in `.test.ts(x)`) |
+
+Before you push, run:
+
+```bash
+pnpm format
+pnpm check
+```
+
+`pnpm format` fixes the formatting of every file. `pnpm check` runs all four checks above, so if it
+passes on your machine, it should pass on your PR too.
 
 ## npm → pnpm cheat sheet
 
