@@ -91,17 +91,17 @@ Both apps get the statuses from `packages/shared/src/statuses.ts`. Change that f
 
 Run these from the repo root.
 
-| Command                 | What it does                                          |
-| ----------------------- | ----------------------------------------------------- |
-| `pnpm dev`              | Start the website and the extension                   |
-| `pnpm dev:web`          | Start only the website                                |
-| `pnpm dev:extension`    | Start only the extension                              |
-| `pnpm build`            | Production build of both apps                         |
-| `pnpm check`            | Run all the code checks (see below)                   |
-| `pnpm format`           | Format every file with Prettier                       |
-| `pnpm db:new <name>`    | Create a new migration file                           |
-| `pnpm db:push`          | Push merged migrations to Dev (Brandon / API/DB only) |
-| `pnpm db:types`         | Regenerate database types from Dev                    |
+| Command              | What it does                                          |
+| -------------------- | ----------------------------------------------------- |
+| `pnpm dev`           | Start the website and the extension                   |
+| `pnpm dev:web`       | Start only the website                                |
+| `pnpm dev:extension` | Start only the extension                              |
+| `pnpm build`         | Production build of both apps                         |
+| `pnpm check`         | Run all the code checks (see below)                   |
+| `pnpm format`        | Format every file with Prettier                       |
+| `pnpm db:new <name>` | Create a new migration file                           |
+| `pnpm db:push`       | Push merged migrations to Dev (Brandon / API/DB only) |
+| `pnpm db:types`      | Regenerate database types from Dev                    |
 
 ## Code checks
 
@@ -126,14 +126,14 @@ passes on your machine, it should pass on your PR too.
 
 ## npm → pnpm cheat sheet
 
-| npm                         | pnpm                         |
-| --------------------------- | ---------------------------- |
-| `npm install`               | `pnpm install`               |
-| `npm install zod`           | `pnpm add zod`               |
-| `npm install -D vitest`     | `pnpm add -D vitest`         |
-| `npm uninstall zod`         | `pnpm remove zod`            |
-| `npm run dev`               | `pnpm dev`                   |
-| `npx some-tool`             | `pnpm dlx some-tool`         |
+| npm                     | pnpm                 |
+| ----------------------- | -------------------- |
+| `npm install`           | `pnpm install`       |
+| `npm install zod`       | `pnpm add zod`       |
+| `npm install -D vitest` | `pnpm add -D vitest` |
+| `npm uninstall zod`     | `pnpm remove zod`    |
+| `npm run dev`           | `pnpm dev`           |
+| `npx some-tool`         | `pnpm dlx some-tool` |
 
 **Monorepo tip:** to add a package to one app, use `--filter` with the app's name from its `package.json`:
 
