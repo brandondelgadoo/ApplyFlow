@@ -8,6 +8,7 @@ assignees: []
 
 <!--
 Title tip: start with a verb and keep it short, e.g. "Add login page" or "Create profile tables".
+Branch: use feat/ for new features (feat/login-page) or chore/ for setup or config (chore/eslint-setup).
 Anything inside these comment tags is a hint for you. It won't show once the issue is posted.
 -->
 
