@@ -85,7 +85,7 @@ pnpm -v
 While `pnpm dev` is running, saving a file reloads the website and the extension automatically.
 Stop everything with `Ctrl + C`.
 
-Both apps get the statuses from `packages/shared/src/statuses.ts`. Change that file and both update.
+Both apps get the statuses from `packages/shared/src/applications.ts`. Change that file and both update.
 
 ## Useful commands
 
