@@ -14,15 +14,21 @@ export const newApplicationSchema = z.object({
   // inputs send an empty string instead of nothing.
   posting_url: z
     .url({ protocol: /^https?$/, error: "Enter the full link, starting with https://" })
-    .optional()
-    .or(z.literal("")),
+    .or(z.literal(""))
+    .transform((value) => value || undefined)
+    .optional(),
   application_url: z
     .url({ protocol: /^https?$/, error: "Enter the full link, starting with https://" })
-    .optional()
-    .or(z.literal("")),
+    .or(z.literal(""))
+    .transform((value) => value || undefined)
+    .optional(),
 
   // "" is allowed for the same reason: an unpicked dropdown sends an empty string.
-  source: z.enum(JOB_SOURCES).optional().or(z.literal("")),
+  source: z
+    .enum(JOB_SOURCES)
+    .or(z.literal(""))
+    .transform((value) => value || undefined)
+    .optional(),
 
   // Left out means the application starts as "Saved".
   status: z.enum(APPLICATION_STATUSES).optional(),

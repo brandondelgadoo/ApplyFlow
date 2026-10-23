@@ -14,7 +14,7 @@ export const APPLICATION_STATUSES = [
 // A type that only allows one of the strings above, e.g. "Applied".
 export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 
-// Most of the possible job sources where a user found the job posting
+// Where the user found the job posting. Optional: jobs saved by the extension may not have one.
 export const JOB_SOURCES = [
   "LinkedIn",
   "Handshake",
