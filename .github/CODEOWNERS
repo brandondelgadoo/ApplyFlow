@@ -8,4 +8,4 @@
 /apps/web/app/api/ @brandondelgadoo
 
 # Shared schemas used by the website and the extension
-/packages/shared/schemas/ @brandondelgadoo
+/packages/shared/src/schemas/ @brandondelgadoo
