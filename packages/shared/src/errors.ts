@@ -1,4 +1,4 @@
-// Every error code the API can send, paired with the HTTP status it's sent with.
+// Every error code the website and extension can get back, paired with the HTTP status it's sent with.
 // The website and extension check the code (not the message) to decide what to do.
 export const ERROR_CODES = {
   // 400 Bad request: the data sent was missing, the wrong type, or not allowed.
@@ -24,6 +24,10 @@ export const ERROR_CODES = {
   // 500 Internal error: something broke on our side. Show a generic message,
   // never the raw database error.
   INTERNAL_ERROR: 500,
+
+  // 0 Network error: the request never reached the server (offline, timed out, or blocked).
+  // The API never sends this; api-client.ts creates it. 0 is used because there was no response.
+  NETWORK_ERROR: 0,
 } as const;
 
 // A type that only allows one of the codes above, e.g. "NOT_FOUND".
