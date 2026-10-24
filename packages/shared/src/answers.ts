@@ -7,7 +7,6 @@ export const ANSWER_CATEGORIES = [
   "Leadership",
   "Teamwork",
   "Difficult challenge",
-  "Teamwork & leadership",
   "Conflict resolution",
   "Strengths",
   "Career goals",
