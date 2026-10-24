@@ -16,11 +16,11 @@ export type InterviewRound = (typeof INTERVIEW_ROUNDS)[number];
 // "Online" is done on your own, like a coding test or a one-way recorded interview.
 export const INTERVIEW_TYPES = ["Phone", "Video", "Onsite", "Online"] as const;
 
-// A type that only allows one of the types of interview above, e.g. "Onsite"
+// A type that only allows one of the types of interview above, e.g. "Onsite".
 export type InterviewType = (typeof INTERVIEW_TYPES)[number];
 
 // The result of an interview. Starts as "Waiting" until the user hears back.
 export const INTERVIEW_OUTCOMES = ["Waiting", "Passed", "Rejected"] as const;
 
-// A type that only allows one of the following outcomes of an interview above, e.g. "Passed"
+// A type that only allows one of the outcomes of an interview above, e.g. "Passed".
 export type InterviewOutcome = (typeof INTERVIEW_OUTCOMES)[number];

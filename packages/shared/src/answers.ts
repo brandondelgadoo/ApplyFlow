@@ -1,4 +1,4 @@
-// Smart Memory uses these to match an application’s question to saved answers.
+// Smart Memory uses these to match an application's question to saved answers.
 // "Teamwork & leadership" answers get suggested for both teamwork and leadership questions.
 export const ANSWER_CATEGORIES = [
   "Tell us about yourself",
