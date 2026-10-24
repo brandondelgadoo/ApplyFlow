@@ -7,3 +7,4 @@ export * from "./answers";
 export * from "./profile";
 export * from "./errors";
 export * from "./schemas/application";
+export * from "./schemas/profile";
