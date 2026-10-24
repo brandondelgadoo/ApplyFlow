@@ -148,13 +148,23 @@ alter table public.education enable row level security;
 alter table public.jobs enable row level security;
 alter table public.projects enable row level security;
 
-create policy "Owner access to profiles" on public.profiles
-    for all to authenticated
+-- Profiles and settings are created by the privileged auth signup trigger.
+-- Authenticated clients may read and edit only their own row, not insert/delete.
+create policy "Owner select profiles" on public.profiles
+    for select to authenticated
+    using ((select auth.uid()) = user_id);
+
+create policy "Owner update profiles" on public.profiles
+    for update to authenticated
     using ((select auth.uid()) = user_id)
     with check ((select auth.uid()) = user_id);
 
-create policy "Owner access to user_settings" on public.user_settings
-    for all to authenticated
+create policy "Owner select user_settings" on public.user_settings
+    for select to authenticated
+    using ((select auth.uid()) = user_id);
+
+create policy "Owner update user_settings" on public.user_settings
+    for update to authenticated
     using ((select auth.uid()) = user_id)
     with check ((select auth.uid()) = user_id);
 
@@ -173,14 +183,19 @@ create policy "Owner access to projects" on public.projects
     using ((select auth.uid()) = user_id)
     with check ((select auth.uid()) = user_id);
 
--- Explicit grants: anonymous clients must not access private applicant data.
+-- Explicit grants: enforce permitted operations as well as row-level ownership.
+-- Supabase projects may grant broad defaults to authenticated; remove those first.
 revoke all on table
     public.profiles, public.user_settings, public.education, public.jobs,
     public.projects
-    from public, anon;
+    from public, anon, authenticated;
+
+grant select, update on table
+    public.profiles, public.user_settings
+    to authenticated;
+
 grant select, insert, update, delete on table
-    public.profiles, public.user_settings, public.education, public.jobs,
-    public.projects
+    public.education, public.jobs, public.projects
     to authenticated;
 
 -- Maintain updated_at for every table automatically.
