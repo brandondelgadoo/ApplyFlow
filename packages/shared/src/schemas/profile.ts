@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { PREFERRED_WORK_SETUPS } from "../profile";
+import { link } from "./common";
 
 // The data a user can send when editing their profile. Every field is optional:
 // - left out (undefined) means "don't change it"
@@ -29,7 +30,7 @@ export const profileUpdateSchema = z.object({
     .optional(),
 
   // Contact. This is the email used on applications, which can be different from the login email.
-  // Formatted fields (email, links, date) are trimmed first, then checked with .pipe(...).
+  // Formatted fields (email and date) are trimmed first, then checked with .pipe(...).
   // The check also allows "", so a blank input passes before it's turned into null.
   email: z
     .string()
@@ -79,38 +80,11 @@ export const profileUpdateSchema = z.object({
     .transform((value) => value || null)
     .optional(),
 
-  // Links. Only http and https are allowed, since these are shown as clickable links and other
-  // kinds (like "javascript:") could run code when clicked. Same rule as the application schema.
-  linkedin_url: z
-    .string()
-    .trim()
-    .pipe(
-      z
-        .url({ protocol: /^https?$/, error: "Enter the full link, starting with https://" })
-        .or(z.literal("")),
-    )
-    .transform((value) => value || null)
-    .optional(),
-  github_url: z
-    .string()
-    .trim()
-    .pipe(
-      z
-        .url({ protocol: /^https?$/, error: "Enter the full link, starting with https://" })
-        .or(z.literal("")),
-    )
-    .transform((value) => value || null)
-    .optional(),
-  portfolio_url: z
-    .string()
-    .trim()
-    .pipe(
-      z
-        .url({ protocol: /^https?$/, error: "Enter the full link, starting with https://" })
-        .or(z.literal("")),
-    )
-    .transform((value) => value || null)
-    .optional(),
+  // Links use the shared rules in common.ts (http/https only, so links like "javascript:"
+  // can't run code when clicked). Blank becomes null here.
+  linkedin_url: link.transform((value) => value || null).optional(),
+  github_url: link.transform((value) => value || null).optional(),
+  portfolio_url: link.transform((value) => value || null).optional(),
 
   // Yes/no questions common on applications. null means "not answered yet" (or cleared).
   // They come from a yes/no picker rather than a text box, so there's no "" to handle.
@@ -127,7 +101,7 @@ export const profileUpdateSchema = z.object({
     .pipe(z.iso.date({ error: "Enter a valid date" }).or(z.literal("")))
     .transform((value) => value || null)
     .optional(),
-  // Text, not a number, so people can write ranges like "$80k–$95k" or "Negotiable".
+  // Text, not a number, so people can write ranges like "$80k-$95k" or "Negotiable".
   salary_expectation: z
     .string()
     .trim()

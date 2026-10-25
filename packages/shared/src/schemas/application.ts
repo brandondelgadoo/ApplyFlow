@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { APPLICATION_STATUSES, JOB_SOURCES } from "../applications";
+import { link } from "./common";
 
 // The data needed to create an application, from the website's "Add application" form
 // or the extension's "Save this job". Used by the website, the extension and the API.
@@ -17,29 +18,10 @@ export const newApplicationSchema = z.object({
     .transform((value) => value || undefined)
     .optional(),
 
-  // Links. Only http and https are allowed, since these are shown as clickable links and other
-  // kinds (like "javascript:") could run code when clicked. They're trimmed first, then checked
-  // with .pipe(...); the check also allows "", because blank form inputs send an empty string.
-  posting_url: z
-    .string()
-    .trim()
-    .pipe(
-      z
-        .url({ protocol: /^https?$/, error: "Enter the full link, starting with https://" })
-        .or(z.literal("")),
-    )
-    .transform((value) => value || undefined)
-    .optional(),
-  application_url: z
-    .string()
-    .trim()
-    .pipe(
-      z
-        .url({ protocol: /^https?$/, error: "Enter the full link, starting with https://" })
-        .or(z.literal("")),
-    )
-    .transform((value) => value || undefined)
-    .optional(),
+  // Links use the shared rules in common.ts (http/https only, so links like "javascript:"
+  // can't run code when clicked). Blank becomes undefined here.
+  posting_url: link.transform((value) => value || undefined).optional(),
+  application_url: link.transform((value) => value || undefined).optional(),
 
   // One of the job sources in applications.ts, or "" from an unpicked dropdown.
   // z.union (instead of .or) lets the friendly message apply to the whole "either/or";
@@ -51,10 +33,12 @@ export const newApplicationSchema = z.object({
     .transform((value) => value || undefined)
     .optional(),
 
-  // Left out means the application starts as "Saved".
+  // One of the statuses in applications.ts. Left out means the application starts as "Saved".
+  // No "" here: the status dropdown always has a status picked.
   status: z.enum(APPLICATION_STATUSES, { error: "Pick one of the statuses" }).optional(),
 
-  // Job descriptions are often pasted in full, so they get a much higher limit than notes.
+  // Optional long text. Job descriptions are often pasted in full, so they get a much higher
+  // limit than notes.
   job_description: z
     .string()
     .trim()
