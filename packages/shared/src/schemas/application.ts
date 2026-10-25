@@ -46,13 +46,13 @@ export const newApplicationSchema = z.object({
   // with .or, users would see Zod's generic "Invalid input" instead.
   source: z
     .union([z.enum(JOB_SOURCES), z.literal("")], {
-      error: "Please pick one of the job sources",
+      error: "Pick one of the job sources",
     })
     .transform((value) => value || undefined)
     .optional(),
 
   // Left out means the application starts as "Saved".
-  status: z.enum(APPLICATION_STATUSES, { error: "Please pick one of the statuses" }).optional(),
+  status: z.enum(APPLICATION_STATUSES, { error: "Pick one of the statuses" }).optional(),
 
   // Job descriptions are often pasted in full, so they get a much higher limit than notes.
   job_description: z

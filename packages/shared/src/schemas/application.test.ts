@@ -104,7 +104,7 @@ describe("newApplicationSchema", () => {
     });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe("Please pick one of the job sources");
+      expect(result.error.issues[0].message).toBe("Pick one of the job sources");
     }
   });
 });
