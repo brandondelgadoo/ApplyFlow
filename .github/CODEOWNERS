@@ -2,7 +2,7 @@
 # Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
 # Database migrations and Supabase config
-/supabase/ @brandondelgadoo
+/supabase/ @brandondelgadoo @lucianadicampli03
 
 # Website API routes
 /apps/web/app/api/ @brandondelgadoo
