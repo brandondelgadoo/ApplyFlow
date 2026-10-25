@@ -121,4 +121,19 @@ describe("profileUpdateSchema", () => {
       expect(result.error.issues[0].message).toBe("Pick one of the preferred work setups");
     }
   });
+
+  // --- Security ---
+
+  // A user could add user_id to their request to try to edit someone else's profile.
+  // Unknown keys are dropped, so only the fields in the schema can ever reach the database.
+  it("drops fields that aren't in the schema, like user_id", () => {
+    const result = profileUpdateSchema.safeParse({
+      first_name: "Brandon",
+      user_id: "someone-else",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toStrictEqual({ first_name: "Brandon" });
+    }
+  });
 });
