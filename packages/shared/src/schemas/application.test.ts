@@ -34,6 +34,18 @@ describe("newApplicationSchema", () => {
     }
   });
 
+  // Same rule as company: only spaces counts as missing.
+  it("rejects a position that is only spaces", () => {
+    const result = newApplicationSchema.safeParse({
+      ...validApplication,
+      position: "      ",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe("Position is required");
+    }
+  });
+
   // --- Links (posting_url; application_url and the profile links use the same shared rules) ---
 
   it("accepts a full https posting url", () => {
