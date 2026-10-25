@@ -34,7 +34,7 @@ export const profileUpdateSchema = z.object({
   email: z
     .string()
     .trim()
-    .pipe(z.email().or(z.literal("")))
+    .pipe(z.email({ error: "Enter a valid email, like name@example.com" }).or(z.literal("")))
     .transform((value) => value || null)
     .optional(),
   // Only the length is checked, not the format, because phone formats vary a lot
@@ -139,7 +139,7 @@ export const profileUpdateSchema = z.object({
   // with .or, users would see Zod's generic "Invalid input" instead.
   preferred_work_setup: z
     .union([z.enum(PREFERRED_WORK_SETUPS), z.literal("")], {
-      error: "Please pick one of the preferred work setups",
+      error: "Pick one of the preferred work setups",
     })
     .transform((value) => value || null)
     .optional(),
