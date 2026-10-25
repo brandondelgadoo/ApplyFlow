@@ -8,6 +8,7 @@ import { z } from "zod";
 // form inputs send an empty string.
 // It stops before turning "" into undefined or null, since each schema does that differently:
 // add .transform(...) and .optional() where it's used.
+// The message only mentions https:// on purpose, to nudge users toward it; http:// still works.
 export const link = z
   .string()
   .trim()
