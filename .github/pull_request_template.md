@@ -46,4 +46,4 @@ Closes #
 - [ ] I didn't edit a migration that was already pushed to Dev
 
 <!-- Ask a teammate to review. Changes to supabase/, apps/web/app/api/ or
-     packages/shared/schemas/ automatically request Brandon. -->
+     packages/shared/src/schemas/ automatically request a code owner. -->
