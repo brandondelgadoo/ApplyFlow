@@ -1,6 +1,6 @@
 // Tests for newApplicationSchema, the rules for a new job application.
-// Each test checks one rule. Fields built the same way share the same code, so one field
-// per pattern is tested (e.g. posting_url covers how links work), plus the risky cases.
+// Each test checks one rule. Links share their rules (common.ts), so posting_url covers them;
+// other patterns are tested on one field (e.g. company for required text), plus the risky cases.
 import { describe, expect, it } from "vitest";
 import { newApplicationSchema } from "./application";
 
@@ -12,6 +12,8 @@ const validApplication = {
 };
 
 describe("newApplicationSchema", () => {
+  // --- Required fields ---
+
   // Every other field is optional, so these two alone must be enough.
   it("accepts an application with only company and position", () => {
     const result = newApplicationSchema.safeParse(validApplication);
@@ -25,14 +27,14 @@ describe("newApplicationSchema", () => {
       company: "      ",
     });
     // Check success first. If the if below were skipped, no expect would run and the
-    // test would pass by accident.
+    // test would pass by accident. Every test below follows the same pattern.
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.error.issues[0].message).toBe("Company is required");
     }
   });
 
-  // --- Links (posting_url; application_url uses the same rules) ---
+  // --- Links (posting_url; application_url and the profile links use the same shared rules) ---
 
   it("accepts a full https posting url", () => {
     const result = newApplicationSchema.safeParse({

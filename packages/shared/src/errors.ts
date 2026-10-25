@@ -1,4 +1,4 @@
-// Every error code the website and extension can get back, paired with the HTTP status it's sent with.
+// Every error code the website and extension can get back, paired with its HTTP status.
 // The website and extension check the code (not the message) to decide what to do.
 export const ERROR_CODES = {
   // 400 Bad request: the data sent was missing, the wrong type, or not allowed.
@@ -22,7 +22,7 @@ export const ERROR_CODES = {
   INVALID_STATUS_ORDER: 422, // a status change that breaks the hiring order
 
   // 500 Internal error: something broke on our side. Show a generic message,
-  // never the raw database error.
+  // never the raw database error. api-client.ts also uses it when the answer isn't JSON.
   INTERNAL_ERROR: 500,
 
   // 0 Network error: the request never reached the server (offline, timed out, or blocked).

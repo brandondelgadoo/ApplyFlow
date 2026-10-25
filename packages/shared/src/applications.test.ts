@@ -1,3 +1,5 @@
+// Tests for the lists in applications.ts. Each test checks the exact values and order,
+// so renaming, removing or reordering one is caught before it breaks the database or forms.
 import { describe, expect, it } from "vitest";
 import { APPLICATION_STATUSES, JOB_SOURCES, OFFER_DECISIONS } from "./applications";
 
@@ -19,7 +21,7 @@ describe("APPLICATION_STATUSES", () => {
 });
 
 describe("JOB_SOURCES", () => {
-  it("has 7 possible job sources a user can pick from", () => {
+  it("has 7 job sources", () => {
     expect(JOB_SOURCES).toHaveLength(7);
     expect(JOB_SOURCES).toEqual([
       "LinkedIn",
@@ -34,7 +36,7 @@ describe("JOB_SOURCES", () => {
 });
 
 describe("OFFER_DECISIONS", () => {
-  it("has 3 possible offer decisions a user can pick from", () => {
+  it("has 3 offer decisions", () => {
     expect(OFFER_DECISIONS).toHaveLength(3);
     expect(OFFER_DECISIONS).toEqual(["Pending", "Accepted", "Declined"]);
   });

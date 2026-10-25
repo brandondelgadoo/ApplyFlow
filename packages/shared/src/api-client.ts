@@ -53,7 +53,7 @@ export async function apiRequest<T>(
   }
 
   // Step 1: Send the request. If this fails, we never got an answer
-  // (offline, blocked, or the browser gave up).
+  // (offline, blocked, or the browser gave up), so it's a NETWORK_ERROR.
   // `response` is declared out here, not inside the try, so step 2 can use it too.
   let response: Response;
   try {
@@ -75,7 +75,7 @@ export async function apiRequest<T>(
   // Step 2: The server answered. Read the answer as JSON.
   // Every API response is { data } or { error }, so pass it straight back.
   // If this fails, the server sent something that isn't JSON (e.g. an HTML crash page),
-  // so the problem is on the server, not the user's internet.
+  // so the problem is on the server, not the user's internet: an INTERNAL_ERROR.
   try {
     return (await response.json()) as ApiResult<T>;
   } catch {

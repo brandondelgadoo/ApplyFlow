@@ -1,3 +1,6 @@
+// Lists of allowed values for job applications, used by the website, the extension and the API.
+// Each list has a matching type, so TypeScript only allows values from the list.
+
 // Every status a job application can be in, in the order a user usually moves through them.
 export const APPLICATION_STATUSES = [
   "Saved",
@@ -11,7 +14,7 @@ export const APPLICATION_STATUSES = [
   "Withdrawn",
 ] as const;
 
-// A type that only allows one of the strings above, e.g. "Applied".
+// A type that only allows one of the statuses above, e.g. "Applied".
 export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 
 // Where the user found the job posting. Optional: jobs saved by the extension may not have one.
