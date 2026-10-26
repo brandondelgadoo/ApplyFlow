@@ -233,7 +233,7 @@ create table public.answers (
         category in (
             'Tell us about yourself', 'Why this company', 'Why this role',
             'Leadership', 'Difficult challenge', 'Teamwork',
-            'Teamwork & leadership', 'Conflict resolution', 'Strengths',
+            'Conflict resolution', 'Strengths',
             'Career goals', 'Other'
         )
     ),
@@ -320,10 +320,6 @@ create policy "Owner access to application_answers" on public.application_answer
     for all to authenticated
     using ((select auth.uid()) = user_id)
     with check ((select auth.uid()) = user_id);
-
--- storage.objects already has these policies turned on in Supabase.
--- Enabling it here keeps a local database from skipping the folder rule.
-alter table storage.objects enable row level security;
 
 -- Resume files: the first folder in the object path must be the user's id.
 create policy "Owner select resume files" on storage.objects
