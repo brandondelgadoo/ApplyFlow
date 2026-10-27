@@ -42,7 +42,7 @@ export const newApplicationSchema = z.object({
   job_description: z
     .string()
     .trim()
-    .max(10000)
+    .max(50000)
     .transform((value) => value || undefined)
     .optional(),
   notes: z
