@@ -3,7 +3,7 @@
 // Docs: https://vitest.dev/config/
 //
 // A test is any file ending in .test.ts or .test.tsx inside apps/ or packages/,
-// e.g. packages/shared/src/statuses.test.ts.
+// e.g. packages/shared/src/applications.test.ts.
 
 import { defineConfig } from "vitest/config";
 
