@@ -213,3 +213,11 @@ pnpm db:types
 
 This reads the schema from the linked Dev project and writes `packages/shared/src/database.types.ts`,
 so it only picks up migrations that have already been pushed.
+
+# ApplyFlow  Design
+Web Design for the application currently has the LoFI formatting with the pages detailing the following:
+1. Wireframe, color pallete and typography schematic
+2. Inspirtaions
+3. Components/Logo
+4. User Flow 
+**Figma Board:** [View Application Design](https://www.figma.com/design/AobcKVVKxrlFnPzbVV02Mp/ApplyFlow?node-id=0-1&t=1VrXGmM4Ie69v0R2-1)
