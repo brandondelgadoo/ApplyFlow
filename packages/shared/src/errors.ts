@@ -7,6 +7,9 @@ export const ERROR_CODES = {
   // 401 Unauthorized: no valid login. The website should send the user to log in.
   UNAUTHORIZED: 401, // login token missing or expired
 
+  // 403 Forbidden: the browser request came from an unapproved origin.
+  ORIGIN_NOT_ALLOWED: 403,
+
   // 404 Not found: also used when the item belongs to another user,
   // so the API never confirms that someone else's data exists.
   NOT_FOUND: 404,
