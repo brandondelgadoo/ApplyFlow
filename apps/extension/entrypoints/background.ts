@@ -26,6 +26,10 @@ export default defineBackground(() => {
       case "PING":
         sendResponse({ ok: true });
         break;
+      // A valid message with no case here yet: answer instead of leaving the sender waiting.
+      default:
+        sendResponse({ ok: false, error: "UNHANDLED_MESSAGE" });
+        break;
     }
   });
 });
