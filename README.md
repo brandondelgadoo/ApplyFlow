@@ -149,6 +149,81 @@ Don't use `npm` in this repo; it creates a `package-lock.json` that conflicts wi
 `.env.example` lists every setting with fake values. Real values go in `.env.local` files, which Git ignores.
 Never commit real keys, and never use `SUPABASE_SERVICE_ROLE_KEY` in browser or extension code.
 
+## API foundation (issue #12)
+
+All product data goes through Next.js routes in `apps/web/app/api/`. New routes should use
+`withApi` from `apps/web/lib/api/handler.ts` for origin checks, CORS, and safe error handling,
+then call `getCurrentUser(request)` from `apps/web/lib/auth/get-current-user.ts`.
+That returns `{ user, supabase }`: the verified user and a per-request database client that
+keeps Row Level Security active. Never use the service-role client for normal user queries.
+
+Authentication accepts either the website's Supabase SSR cookies or the extension's
+`Authorization: Bearer <access_token>` header. A supplied bearer token takes precedence;
+an invalid token does not fall back to cookies. Website login should use `createBrowserClient`
+from `@supabase/ssr` so its session is available as cookies. Token verification uses
+Supabase Auth's `getUser`, not an unverified session or a locally decoded JWT.
+
+Responses use `{ data: ... }` on success and `{ error: { code, message } }` on failure.
+Use `successResponse(data)` for 200, `successResponse(data, 201)` for creation, or throw an
+`ApiError(code, safeMessage)`. Codes and response types live in `@applyflow/shared`.
+Supported errors are 400 (bad input), 401 (login required), 403 (origin rejected),
+404 (not found), 409 (conflict), 422 (business rule), and 500 (unexpected failure).
+Unexpected errors return a generic message. API responses are private and never cached.
+
+### Allowed callers
+
+Copy the new API settings from `.env.example` into `apps/web/.env.local`:
+
+```ini
+API_ALLOWED_WEB_ORIGINS=http://localhost:3000
+API_ALLOWED_EXTENSION_IDS=
+```
+
+On Vercel, explicitly set `API_ALLOWED_WEB_ORIGINS` to the exact approved website origins,
+comma-separated, without paths or trailing slashes. Include a preview's origin when testing it.
+Add the extension ID from `chrome://extensions` to `API_ALLOWED_EXTENSION_IDS` before
+connecting the extension. An empty extension list allows no extension origins.
+Wildcards and arbitrary caller-supplied hosts are not trusted.
+
+Browser same-origin GET/HEAD requests may omit `Origin`; these are accepted only when
+`Sec-Fetch-Site` is `same-origin` and the request URL uses an approved website origin.
+Other requests need an approved `Origin`. Extension requests send the bearer token and
+should use the background worker. `OPTIONS` handles preflight without authentication,
+allowing `Authorization`, `Content-Type`, and `X-Timezone`. Export `OPTIONS = apiOptions`
+from each new API route. Future date-dependent endpoints should read `X-Timezone`.
+
+Origin/CORS checks restrict browser callers; they do not prove a client's identity because
+non-browser tools can send an Origin header too. Verified authentication and RLS remain
+required for every protected endpoint.
+
+### First endpoint: GET /api/settings
+
+Returns the authenticated user's existing `public.user_settings` row, including
+`hidden_board_columns`, `default_resume_id`, `onboarding_checklist_hidden_at`, and
+`extension_last_connected_at`, plus its ID, user ID, and timestamps. New users have
+`["Withdrawn"]` hidden by the signup trigger in the existing migration. This endpoint does
+not create or update settings. It ignores caller-supplied user IDs, returns 404 if the row is
+missing, and returns 401 if credentials are missing or invalid.
+
+For a development smoke check, start the web app with the Dev Supabase URL and anon key
+configured. In PowerShell, use an access token from a fake Dev account (never commit it):
+
+```powershell
+$headers = @{
+  Origin = 'http://localhost:3000'
+  Authorization = "Bearer $env:APPLYFLOW_TEST_ACCESS_TOKEN"
+}
+Invoke-RestMethod -Uri 'http://localhost:3000/api/settings' -Headers $headers
+```
+
+With a website session established by SSR login, `fetch('/api/settings')` from the website
+returns the same row. Check that missing/expired credentials return 401 and an unknown
+origin returns 403. Use separate fake accounts to confirm that each gets only its own row.
+The default settings row must already exist through the migration's signup trigger.
+
+Run `pnpm test` for the foundation's automated tests and `pnpm check` for all required checks.
+Unit/integration tests use fake data and never contact the Dev or Production database.
+
 ## Database
 
 The database runs on [Supabase](https://supabase.com). There are two projects, **Dev** and **Prod**.

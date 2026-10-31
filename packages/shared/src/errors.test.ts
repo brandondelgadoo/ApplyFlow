@@ -8,6 +8,7 @@ describe("ERROR_CODES", () => {
     expect(ERROR_CODES).toStrictEqual({
       VALIDATION_ERROR: 400,
       UNAUTHORIZED: 401,
+      ORIGIN_NOT_ALLOWED: 403,
       NOT_FOUND: 404,
       CONFLICT: 409,
       DUPLICATE_URL: 409,
