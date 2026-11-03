@@ -11,6 +11,9 @@ export * from "./profile";
 // Error codes the website and extension can get back.
 export * from "./errors";
 
+// Hiring-order rules for status history. The database triggers enforce the same rules.
+export * from "./hiring-order";
+
 // Zod schemas that check data before it's saved.
 export * from "./schemas/application";
 export * from "./schemas/profile";
