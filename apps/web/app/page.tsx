@@ -1,9 +1,11 @@
 import { APPLICATION_STATUSES } from "@applyflow/shared";
+import { AccountBar } from "../components/account-bar";
 
 export default function HomePage() {
   return (
     <main className="mx-auto max-w-xl px-6 py-16">
       <h1 className="text-3xl font-bold">ApplyFlow</h1>
+      <AccountBar />
       <p className="mt-2 text-slate-600">
         Application statuses (imported from <code>@applyflow/shared</code>):
       </p>
