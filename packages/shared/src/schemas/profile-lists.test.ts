@@ -7,6 +7,7 @@ import {
   educationUpdateSchema,
   jobCreateSchema,
   jobUpdateSchema,
+  MAX_PROFILE_LIST_ITEMS,
   profileListOrderSchema,
   projectCreateSchema,
   projectUpdateSchema,
@@ -339,6 +340,26 @@ describe("profileListOrderSchema", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.error.issues[0].message).toBe("The same id can't appear twice");
+    }
+  });
+
+  // Builds n different valid ids, e.g. 00000000-0000-4000-8000-000000000001.
+  const manyIds = (n: number) =>
+    Array.from(
+      { length: n },
+      (_, i) => `00000000-0000-4000-8000-${String(i + 1).padStart(12, "0")}`,
+    );
+
+  it("accepts the maximum number of items", () => {
+    const result = profileListOrderSchema.safeParse({ ids: manyIds(MAX_PROFILE_LIST_ITEMS) });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects more than the maximum number of items", () => {
+    const result = profileListOrderSchema.safeParse({ ids: manyIds(MAX_PROFILE_LIST_ITEMS + 1) });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe("You can have at most 20 items");
     }
   });
 

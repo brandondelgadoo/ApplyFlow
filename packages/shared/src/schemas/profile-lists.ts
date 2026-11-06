@@ -153,6 +153,11 @@ export type ProjectUpdate = z.infer<typeof projectUpdateSchema>;
 
 // --- Reordering ---
 
+// The most schools, jobs or projects a user can have in each list.
+// The reorder schema below uses it, and the API's add endpoints (#36) must use it too:
+// if users could add more items than this, they could never reorder the full list.
+export const MAX_PROFILE_LIST_ITEMS = 20;
+
 // Sent when the user drags items into a new order: every id in the list, in the new order.
 // Shared by schools, jobs and projects. The API checks that the ids are exactly the user's items.
 export const profileListOrderSchema = z.object({
@@ -161,6 +166,7 @@ export const profileListOrderSchema = z.object({
       error: "Send the list of ids in their new order",
     })
     .min(1, "Send at least one id")
+    .max(MAX_PROFILE_LIST_ITEMS, `You can have at most ${MAX_PROFILE_LIST_ITEMS} items`)
     .refine((ids) => new Set(ids).size === ids.length, {
       error: "The same id can't appear twice",
     }),
