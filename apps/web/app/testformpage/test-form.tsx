@@ -2,18 +2,9 @@
 
 import { useState } from "react";
 
-// A deliberately plain practice page for the extension team.
-//
-// Real job applications are messy, so this form copies the awkward parts on purpose:
-// labels that don't say "name", a box React owns, a dropdown that isn't a <select>,
-// a form inside a frame, yes/no buttons instead of radios, a date split into three
-// boxes, and a file upload. Nothing is saved; submitting just shows the confirmation
-// in the same page, so the URL never changes.
-
 const DEGREES = ["Bachelor's", "Master's", "PhD", "Associate", "Other"];
 
-// The framed form lives in its own document, which a content script only reaches when
-// the manifest sets "all_frames": true. It's a string so this whole page stays one file.
+// the manifest sets "all_frames": true
 const FRAME_HTML = `<!doctype html>
 <html>
   <body style="font-family: system-ui, sans-serif; padding: 8px">
@@ -36,16 +27,13 @@ const labelClass = "block text-sm font-medium";
 export default function TestForm() {
   const [submitted, setSubmitted] = useState(false);
 
-  // The controlled box. Its value only changes through this state, so writing to the
-  // DOM node directly gets undone the next time React renders.
+  // The control box
   const [email, setEmail] = useState("");
 
-  // The custom dropdown keeps its own open/closed state and the picked option, because
-  // there's no native <select> underneath to do it for us.
   const [degree, setDegree] = useState("");
   const [degreeOpen, setDegreeOpen] = useState(false);
 
-  // The yes/no buttons aren't form fields, so the answer lives in state too.
+  //form fields
   const [authorized, setAuthorized] = useState<boolean | null>(null);
 
   if (submitted) {
@@ -78,18 +66,16 @@ export default function TestForm() {
           setSubmitted(true);
         }}
       >
-        {/* "Given Name" instead of "First name": the label doesn't match the field name,
-            which is the usual reason a matcher misses it. */}
         <div>
           <label htmlFor="first_name" className={labelClass}>
-            Given Name
+            First Name
           </label>
           <input id="first_name" name="first_name" className={inputClass} />
         </div>
 
         <div>
           <label htmlFor="last_name" className={labelClass}>
-            Family Name
+            Last Name
           </label>
           <input id="last_name" name="last_name" className={inputClass} />
         </div>
@@ -132,8 +118,6 @@ export default function TestForm() {
           <input id="major" name="major" className={inputClass} />
         </div>
 
-        {/* A dropdown built from buttons, not a <select>. It has to be clicked open, then
-            clicked again to pick, so a matcher can't just set a value. */}
         <div>
           <span className={labelClass} id="degree-label">
             Degree
@@ -174,8 +158,7 @@ export default function TestForm() {
           </div>
         </div>
 
-        {/* One date across three boxes. Each part is its own input, so they have to be
-            filled separately and joined back into a real date. */}
+        {/* One date across three boxes. */}
         <div>
           <span className={labelClass}>Graduation date</span>
           <div className="mt-1 flex gap-2">
@@ -206,8 +189,6 @@ export default function TestForm() {
           </div>
         </div>
 
-        {/* Yes/no as buttons. There's no radio or checkbox to tick, so the answer only
-            exists once one of them is clicked. */}
         <div>
           <span className={labelClass}>Authorized to work in the US?</span>
           <div className="mt-1 flex gap-2" role="group" aria-label="Work authorization">
