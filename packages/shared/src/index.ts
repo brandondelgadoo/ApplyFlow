@@ -8,6 +8,9 @@ export * from "./interviews";
 export * from "./answers";
 export * from "./profile";
 
+// How complete a user's profile is, for the Profile page and the dashboard checklist.
+export * from "./profile-completeness";
+
 // Error codes the website and extension can get back.
 export * from "./errors";
 
