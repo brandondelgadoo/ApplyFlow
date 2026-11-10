@@ -40,44 +40,55 @@ const PROFILE_COLUMNS = [
   "updated_at",
 ].join(", ");
 
-export const GET = withApi(async (request) => {
-  const { user, supabase } = await getCurrentUser(request);
+// The supabase client getCurrentUser returns, so the helper can take it as a parameter.
+type Supabase = Awaited<ReturnType<typeof getCurrentUser>>["supabase"];
 
-  // Read the profile, schools and jobs at the same time.
-  // overrideTypes tells TypeScript what each result looks like, since the generated
-  // database types (#33) aren't in yet. It changes nothing when the code runs.
-  const [profileResult, educationResult, jobsResult] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select(PROFILE_COLUMNS)
-      .eq("user_id", user.id)
-      .maybeSingle()
-      .overrideTypes<Profile, { merge: false }>(),
+// Works out how complete a profile is. Used by GET and PATCH, which both send it back.
+async function getCompleteness(supabase: Supabase, userId: string, profile: Profile) {
+  const [educationResult, jobsResult] = await Promise.all([
     supabase
       .from("education")
       .select("major, graduation_date")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .overrideTypes<ProfileCompletenessInput["education"], { merge: false }>(),
     supabase
       .from("jobs")
       .select("id")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .overrideTypes<ProfileCompletenessInput["jobs"], { merge: false }>(),
   ]);
 
   // A database error becomes INTERNAL_ERROR in handleApiError, so the raw message is never shown.
-  if (profileResult.error) throw profileResult.error;
   if (educationResult.error) throw educationResult.error;
   if (jobsResult.error) throw jobsResult.error;
+
+  return getProfileCompleteness({
+    profile,
+    education: educationResult.data,
+    jobs: jobsResult.data,
+  });
+}
+
+export const GET = withApi(async (request) => {
+  const { user, supabase } = await getCurrentUser(request);
+
+  // Read the user's profile.
+  // overrideTypes tells TypeScript what each result looks like, since the generated
+  // database types (#33) aren't in yet. It changes nothing when the code runs.
+  const profileResult = await supabase
+    .from("profiles")
+    .select(PROFILE_COLUMNS)
+    .eq("user_id", user.id)
+    .maybeSingle()
+    .overrideTypes<Profile, { merge: false }>();
+
+  // A database error becomes INTERNAL_ERROR in handleApiError, so the raw message is never shown.
+  if (profileResult.error) throw profileResult.error;
 
   // Every user gets a profile row at sign-up (the #8 trigger), so this should never happen.
   if (!profileResult.data) throw new ApiError("NOT_FOUND", "Profile was not found.");
 
-  const completeness = getProfileCompleteness({
-    profile: profileResult.data,
-    education: educationResult.data,
-    jobs: jobsResult.data,
-  });
+  const completeness = await getCompleteness(supabase, user.id, profileResult.data);
 
   return successResponse({ profile: profileResult.data, completeness });
 });
