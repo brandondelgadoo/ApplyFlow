@@ -14,6 +14,7 @@ export * from "./errors";
 // Zod schemas that check data before it's saved.
 export * from "./schemas/application";
 export * from "./schemas/profile";
+export * from "./schemas/profile-lists";
 
 // The shared function for calling the ApplyFlow API.
 export * from "./api-client";
