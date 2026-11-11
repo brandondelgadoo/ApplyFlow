@@ -19,5 +19,8 @@ export * from "./schemas/profile-lists";
 // The shared function for calling the ApplyFlow API.
 export * from "./api-client";
 
+// Cleaned job URLs for duplicate checks.
+export * from "./urls";
+
 // Settings returned by the API.
 export * from "./settings";
