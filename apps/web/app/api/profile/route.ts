@@ -1,7 +1,9 @@
 // API route for the user's profile, used by the Profile page and onboarding.
 // GET returns the profile plus how complete it is (see getProfileCompleteness in @applyflow/shared).
+// PATCH saves only the fields that were sent and returns the same shape as GET.
 import {
   getProfileCompleteness,
+  profileUpdateSchema,
   type Profile,
   type ProfileCompletenessInput,
 } from "@applyflow/shared";
@@ -79,6 +81,49 @@ export const GET = withApi(async (request) => {
     .from("profiles")
     .select(PROFILE_COLUMNS)
     .eq("user_id", user.id)
+    .maybeSingle()
+    .overrideTypes<Profile, { merge: false }>();
+
+  // A database error becomes INTERNAL_ERROR in handleApiError, so the raw message is never shown.
+  if (profileResult.error) throw profileResult.error;
+
+  // Every user gets a profile row at sign-up (the #8 trigger), so this should never happen.
+  if (!profileResult.data) throw new ApiError("NOT_FOUND", "Profile was not found.");
+
+  const completeness = await getCompleteness(supabase, user.id, profileResult.data);
+
+  return successResponse({ profile: profileResult.data, completeness });
+});
+
+export const PATCH = withApi(async (request) => {
+  const { user, supabase } = await getCurrentUser(request);
+
+  // Bad JSON is the caller's mistake, so it's a 400. Without this catch,
+  // handleApiError would turn it into a 500, which means "we broke".
+  // Only request.json() is inside the try, so validation errors below keep their own message.
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    throw new ApiError("VALIDATION_ERROR", "Send the changes as JSON.");
+  }
+
+  // Check the changes. Fields that weren't sent stay out of result.data, so they aren't changed,
+  // and unknown keys (like user_id) are dropped. Only the first problem is sent back.
+  const result = profileUpdateSchema.safeParse(body);
+  if (!result.success) throw new ApiError("VALIDATION_ERROR", result.error.issues[0].message);
+
+  // Checked after safeParse, so a body with only unknown keys counts as empty too.
+  if (Object.keys(result.data).length === 0) {
+    throw new ApiError("VALIDATION_ERROR", "Nothing to update.");
+  }
+
+  // Save the changes to the user's own row and get the saved profile back.
+  const profileResult = await supabase
+    .from("profiles")
+    .update(result.data)
+    .eq("user_id", user.id)
+    .select(PROFILE_COLUMNS)
     .maybeSingle()
     .overrideTypes<Profile, { merge: false }>();
 
