@@ -18,6 +18,7 @@ export * from "./errors";
 export * from "./schemas/application";
 export * from "./schemas/profile";
 export * from "./schemas/settings";
+export * from "./schemas/profile-lists";
 
 // The shared function for calling the ApplyFlow API.
 export * from "./api-client";
