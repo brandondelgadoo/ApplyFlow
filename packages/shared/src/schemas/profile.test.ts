@@ -1,5 +1,5 @@
 // Tests for profileUpdateSchema, the rules for editing a profile.
-// Every field is optional: left out means "don't change it", and blank becomes null ("clear it").
+// Every field is optional: left out means "don't change it", and blank or null becomes null ("clear it").
 // Each test checks one rule. Links share their rules (common.ts), so linkedin_url covers them;
 // other patterns are tested on one field (e.g. first_name for text), plus the risky cases.
 import { describe, expect, it } from "vitest";
@@ -108,6 +108,29 @@ describe("profileUpdateSchema", () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.willing_to_relocate).toBeNull();
+    }
+  });
+
+  // Every other field can be cleared with null too, not just "", so the extension and other
+  // callers can clear fields the same way as on the applications endpoint.
+  // One field of each kind: text, email, link, date and dropdown.
+  it("lets every kind of field be cleared with null", () => {
+    const result = profileUpdateSchema.safeParse({
+      phone: null,
+      email: null,
+      linkedin_url: null,
+      earliest_start_date: null,
+      preferred_work_setup: null,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toStrictEqual({
+        phone: null,
+        email: null,
+        linkedin_url: null,
+        earliest_start_date: null,
+        preferred_work_setup: null,
+      });
     }
   });
 

@@ -8,16 +8,21 @@ export * from "./interviews";
 export * from "./answers";
 export * from "./profile";
 
+// How complete a user's profile is, for the Profile page and the dashboard checklist.
+export * from "./profile-completeness";
+
 // Error codes the website and extension can get back.
 export * from "./errors";
 
 // Zod schemas that check data before it's saved.
 export * from "./schemas/application";
 export * from "./schemas/profile";
+export * from "./schemas/settings";
 export * from "./schemas/profile-lists";
 
 // The shared function for calling the ApplyFlow API.
 export * from "./api-client";
 
-// Settings returned by the API.
+// Data returned by the API.
 export * from "./settings";
+export * from "./profile-data";
