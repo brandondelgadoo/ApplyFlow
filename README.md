@@ -289,6 +289,11 @@ pnpm db:types
 This reads the schema from the linked Dev project and writes `packages/shared/src/database.types.ts`,
 so it only picks up migrations that have already been pushed.
 
+Whoever pushes a migration to Dev also runs `pnpm db:types` right after, and opens a small PR with the
+updated file. It can't go in the migration's own PR, because that PR is merged before the push. Keeping
+this file in step with Dev matters: if it falls behind, TypeScript won't know about new or changed columns,
+and API code can compile against columns that no longer match the database.
+
 # ApplyFlow Design
 
 Web Design for the application currently has the LoFI formatting with the pages detailing the following:
