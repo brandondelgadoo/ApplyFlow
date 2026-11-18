@@ -2,7 +2,7 @@
 // Each test checks one rule. Links share their rules (common.ts), so posting_url covers them;
 // other patterns are tested on one field (e.g. company for required text), plus the risky cases.
 import { describe, expect, it } from "vitest";
-import { newApplicationSchema } from "./application";
+import { applicationUpdateSchema, newApplicationSchema } from "./application";
 
 // The smallest valid application. Each test copies it with ...validApplication and changes
 // only the field it's about, so if a test fails, that field is the reason.
@@ -111,6 +111,31 @@ describe("newApplicationSchema", () => {
 
   // Only values from JOB_SOURCES are allowed, and the user sees a friendly message,
   // not Zod's default one.
+  it("keeps a starting status date and treats a blank one as left out", () => {
+    const kept = newApplicationSchema.safeParse({
+      ...validApplication,
+      status: "Applied",
+      status_date: "2026-11-03",
+    });
+    expect(kept.success).toBe(true);
+    if (kept.success) expect(kept.data.status_date).toBe("2026-11-03");
+
+    const blank = newApplicationSchema.safeParse({ ...validApplication, status_date: "" });
+    expect(blank.success).toBe(true);
+    if (blank.success) expect(blank.data.status_date).toBeUndefined();
+  });
+
+  it("rejects a starting date that isn't YYYY-MM-DD", () => {
+    const result = newApplicationSchema.safeParse({
+      ...validApplication,
+      status_date: "last Tuesday",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe("Enter the date as YYYY-MM-DD");
+    }
+  });
+
   it("rejects a source that isn't in the list", () => {
     const result = newApplicationSchema.safeParse({
       ...validApplication,
@@ -120,5 +145,33 @@ describe("newApplicationSchema", () => {
     if (!result.success) {
       expect(result.error.issues[0].message).toBe("Pick one of the job sources");
     }
+  });
+});
+
+describe("applicationUpdateSchema", () => {
+  it("leaves out fields that were not sent and turns a blank or null into a clear", () => {
+    const result = applicationUpdateSchema.safeParse({
+      company: "  Stripe  ",
+      location: "",
+      posting_url: null,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.company).toBe("Stripe");
+      expect(result.data.location).toBeNull();
+      expect(result.data.posting_url).toBeNull();
+      expect(result.data).not.toHaveProperty("position");
+      expect(result.data).not.toHaveProperty("status");
+    }
+  });
+
+  it("does not accept a status change or a cleared company", () => {
+    const status = applicationUpdateSchema.safeParse({ status: "Offer" });
+    expect(status.success).toBe(true);
+    if (status.success) expect(status.data).not.toHaveProperty("status");
+
+    const cleared = applicationUpdateSchema.safeParse({ company: null });
+    expect(cleared.success).toBe(false);
+    if (!cleared.success) expect(cleared.error.issues[0].message).toBe("Company is required");
   });
 });
