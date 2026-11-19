@@ -278,6 +278,8 @@ through a migration file in a PR. Dashboard changes skip review and never reach 
 
    Migrations are only pushed after their PR is merged. Don't run `db:push` from your own branch.
 
+   Then regenerate the types (see [Regenerate types](#regenerate-types) below).
+
 ### Regenerate types
 
 After a schema change has been pushed to Dev, regenerate the TypeScript types and commit the result in a PR:
@@ -288,6 +290,14 @@ pnpm db:types
 
 This reads the schema from the linked Dev project and writes `packages/shared/src/database.types.ts`,
 so it only picks up migrations that have already been pushed.
+
+`pnpm db:push` changes the Dev database, not any file, so it doesn't need its own PR: it only runs
+migrations that were already reviewed and merged into `main`. `pnpm db:types` changes a file in the repo,
+so it does need a PR, since nothing reaches `main` without one.
+
+So whoever pushes a migration to Dev runs `pnpm db:types` right after, on a new branch, and opens a small
+PR with the updated `database.types.ts`. If this is skipped, the types fall behind the database, and
+TypeScript won't know about new or changed columns.
 
 # ApplyFlow Design
 
