@@ -1,4 +1,9 @@
-import { applicationUpdateSchema, cleanJobUrl, type ApplicationUpdate } from "@applyflow/shared";
+import {
+  applicationUpdateSchema,
+  cleanJobUrl,
+  type ApplicationUpdate,
+  type Database,
+} from "@applyflow/shared";
 import { getCurrentUser } from "../../../../lib/auth/get-current-user";
 import {
   toApplicationDetail,
@@ -30,10 +35,12 @@ type ApplicationRow = {
 };
 
 function changesFrom(update: ApplicationUpdate) {
-  const changes: Record<string, string | null | boolean> = {};
+  const changes: Database["public"]["Tables"]["applications"]["Update"] = {};
+  // company and position can't be null in the database, so they're set on their own.
+  // The fields in the loop below can all be null.
+  if (update.company !== undefined) changes.company = update.company;
+  if (update.position !== undefined) changes.position = update.position;
   const text = [
-    "company",
-    "position",
     "location",
     "source",
     "job_description",

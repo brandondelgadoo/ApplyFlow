@@ -6,14 +6,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // vi.hoisted runs before the imports below, so these fakes exist by the time
 // vi.mock swaps the fake getCurrentUser in for the real one.
 // Each fake stands for one step of a Supabase query chain.
-const { getCurrentUser, from, select, update, eq, maybeSingle, overrideTypes } = vi.hoisted(() => ({
+const { getCurrentUser, from, select, update, eq, maybeSingle } = vi.hoisted(() => ({
   getCurrentUser: vi.fn(),
   from: vi.fn(),
   select: vi.fn(),
   update: vi.fn(),
   eq: vi.fn(),
   maybeSingle: vi.fn(),
-  overrideTypes: vi.fn(),
 }));
 vi.mock("../../../lib/auth/get-current-user", () => ({ getCurrentUser }));
 
@@ -59,16 +58,15 @@ beforeEach(() => {
   vi.stubEnv("API_ALLOWED_WEB_ORIGINS", "http://localhost:3000");
   vi.stubEnv("API_ALLOWED_EXTENSION_IDS", "");
   // Wire the fakes into both chains:
-  // GET:   from → select → eq → maybeSingle → overrideTypes
-  // PATCH: from → update → eq → select → maybeSingle → overrideTypes
+  // GET:   from → select → eq → maybeSingle
+  // PATCH: from → update → eq → select → maybeSingle
   // Each step returns every next step either route can use, so one setup works for both.
   from.mockReturnValue({ select, update });
   select.mockReturnValue({ eq, maybeSingle });
   update.mockReturnValue({ eq });
   eq.mockReturnValue({ maybeSingle, select });
-  maybeSingle.mockReturnValue({ overrideTypes });
-  // The database's answer, unless a test changes it.
-  overrideTypes.mockResolvedValue({ data: settings, error: null });
+  // The database's answer, unless a test changes it. maybeSingle is the last step of both chains.
+  maybeSingle.mockResolvedValue({ data: settings, error: null });
   getCurrentUser.mockResolvedValue({ user: { id: "user-a" }, supabase: { from } });
 });
 afterEach(() => vi.unstubAllEnvs());
@@ -91,12 +89,12 @@ describe("GET /api/settings", () => {
   });
 
   it("returns 404 for a missing row without inventing settings", async () => {
-    overrideTypes.mockResolvedValue({ data: null, error: null });
+    maybeSingle.mockResolvedValue({ data: null, error: null });
     expect((await GET(request())).status).toBe(404);
   });
 
   it("hides database error details", async () => {
-    overrideTypes.mockResolvedValue({ data: null, error: { message: "private database detail" } });
+    maybeSingle.mockResolvedValue({ data: null, error: { message: "private database detail" } });
     const response = await GET(request());
     expect(response.status).toBe(500);
     expect(await response.text()).not.toContain("private database detail");
@@ -198,7 +196,7 @@ describe("PATCH /api/settings", () => {
 
   it("hides database error details", async () => {
     // A valid body, so the route gets past validation and reaches the database.
-    overrideTypes.mockResolvedValue({ data: null, error: { message: "private database detail" } });
+    maybeSingle.mockResolvedValue({ data: null, error: { message: "private database detail" } });
     const response = await PATCH(patch({ hidden_board_columns: ["Withdrawn", "Ghosted"] }));
 
     expect(response.status).toBe(500);

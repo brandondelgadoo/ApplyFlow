@@ -15,21 +15,23 @@ import { PROFILE_PARTS } from "@applyflow/shared";
 import { GET, PATCH } from "./route";
 import { ApiError } from "../../../lib/api/responses";
 
-// A fake query for one table. Every step (select, update, eq, maybeSingle) returns the same
-// object, so any chain works, in any order. overrideTypes is always the last step, so it
-// returns the result: what the database "answers" for this table.
+// A fake query for one table. select, update and eq return the same object, so any chain
+// works, in any order. The result (what the database "answers" for this table) comes back
+// from whichever step is awaited last: maybeSingle() for a single row, or the query itself
+// for a list.
 function table(result: { data: unknown; error: unknown }) {
   const query = {
     select: vi.fn(),
     update: vi.fn(),
     eq: vi.fn(),
-    maybeSingle: vi.fn(),
-    overrideTypes: vi.fn().mockResolvedValue(result),
+    maybeSingle: vi.fn().mockResolvedValue(result),
+    // The list queries (education, jobs) end at .eq(...) and are awaited directly, so the
+    // fake itself has to be awaitable: await calls then(), which hands back the result.
+    then: (resolve: (value: typeof result) => unknown) => resolve(result),
   };
   query.select.mockReturnValue(query);
   query.update.mockReturnValue(query);
   query.eq.mockReturnValue(query);
-  query.maybeSingle.mockReturnValue(query);
   return query;
 }
 

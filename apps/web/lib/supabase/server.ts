@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
+import type { Database } from "@applyflow/shared";
 
 function configuration() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -13,7 +14,7 @@ function configuration() {
 export async function createCookieClient() {
   const { url, key } = configuration();
   const cookieStore = await cookies();
-  return createServerClient(url, key, {
+  return createServerClient<Database>(url, key, {
     cookies: {
       getAll: () => cookieStore.getAll(),
       setAll: (cookiesToSet) => {
@@ -27,7 +28,7 @@ export async function createCookieClient() {
 
 export function createBearerClient(token: string) {
   const { url, key } = configuration();
-  return createClient(url, key, {
+  return createClient<Database>(url, key, {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
     // Database calls use the user's token too, keeping RLS active. No service key.
     global: { headers: { Authorization: `Bearer ${token}` } },
