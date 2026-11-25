@@ -2,26 +2,18 @@
 // GET returns the settings row. PATCH changes the hidden board columns and whether the
 // setup checklist is hidden, and returns the same shape as GET.
 // The default resume can't be changed here: only the resumes endpoints can change it.
-import { type ApplicationStatus, type UserSettings, settingsUpdateSchema } from "@applyflow/shared";
+import { type ApplicationStatus, settingsUpdateSchema } from "@applyflow/shared";
 import { getCurrentUser } from "../../../lib/auth/get-current-user";
 import { apiOptions, withApi } from "../../../lib/api/handler";
 import { ApiError, successResponse } from "../../../lib/api/responses";
 
 export const dynamic = "force-dynamic";
 
-// The settings columns the API sends back, shared by GET and PATCH so both return the same shape.
-// Listed by name so a new internal column never appears by accident.
-// Must match the UserSettings type in packages/shared/src/settings.ts.
-const SETTINGS_COLUMNS = [
-  "id",
-  "user_id",
-  "hidden_board_columns",
-  "default_resume_id",
-  "onboarding_checklist_hidden_at",
-  "extension_last_connected_at",
-  "created_at",
-  "updated_at",
-].join(", ");
+// Written as one string (not an array joined together), so Supabase can check every column
+// name against the generated database types. Listed by name so a new internal column never
+// appears by accident.
+const SETTINGS_COLUMNS =
+  "id, user_id, hidden_board_columns, default_resume_id, onboarding_checklist_hidden_at, extension_last_connected_at, created_at, updated_at";
 
 export const GET = withApi(async (request) => {
   const { user, supabase } = await getCurrentUser(request);
@@ -29,8 +21,7 @@ export const GET = withApi(async (request) => {
     .from("user_settings")
     .select(SETTINGS_COLUMNS)
     .eq("user_id", user.id)
-    .maybeSingle()
-    .overrideTypes<UserSettings, { merge: false }>();
+    .maybeSingle();
 
   if (error) throw error;
   if (!data) throw new ApiError("NOT_FOUND", "Settings were not found.");
@@ -87,8 +78,7 @@ export const PATCH = withApi(async (request) => {
     .update(changes)
     .eq("user_id", user.id)
     .select(SETTINGS_COLUMNS)
-    .maybeSingle()
-    .overrideTypes<UserSettings, { merge: false }>();
+    .maybeSingle();
 
   // A database error becomes INTERNAL_ERROR in handleApiError, so the raw message is never shown.
   if (settingsResult.error) throw settingsResult.error;

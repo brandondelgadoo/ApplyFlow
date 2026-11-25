@@ -26,7 +26,10 @@ export * from "./api-client";
 // Cleaned job URLs for duplicate checks.
 export * from "./urls";
 
-// Settings returned by the API.
 // Data returned by the API.
 export * from "./settings";
 export * from "./profile-data";
+
+// The database's tables and columns, written by `pnpm db:types`. Never edit it by hand.
+// Only Database is exported; the file's other helpers (Tables, Json…) stay internal.
+export type { Database } from "./database.types";
