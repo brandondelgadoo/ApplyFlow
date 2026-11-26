@@ -61,7 +61,7 @@ begin
     headers_text := pg_catalog.current_setting('request.headers', true);
     if headers_text is not null and pg_catalog.btrim(headers_text) <> '' then
         begin
-            tz := pg_catalog.nullif(
+            tz := nullif(
                 pg_catalog.btrim((headers_text::json) ->> 'x-timezone'),
                 ''
             );
@@ -72,7 +72,7 @@ begin
     end if;
 
     if tz is null then
-        tz := pg_catalog.nullif(
+        tz := nullif(
             pg_catalog.btrim(pg_catalog.current_setting('app.timezone', true)),
             ''
         );
@@ -125,6 +125,15 @@ begin
             from public.status_history h
             where h.application_id = target_application
                 and (excluded_id is null or h.id is distinct from excluded_id)
+                -- The triggers below run this as the owner, so RLS does not apply.
+                -- Match RLS: API roles (authenticated, anon; add any new one here)
+                -- read only the signed-in user's rows. Other sessions, such as the
+                -- service role or the SQL editor, read every row.
+                and (
+                    (select pg_catalog.current_setting('role', true))
+                        not in ('authenticated', 'anon')
+                    or h.user_id = (select auth.uid())
+                )
             union all
             select
                 new_status,
@@ -187,9 +196,14 @@ begin
 end;
 $$;
 
+-- The trigger functions below are security definer, like handle_new_user, so
+-- they can call the private helpers above whoever fires them. API roles have no
+-- access to schema private, and on Postgres 17 a cascaded AFTER trigger runs as
+-- the role that started the delete (Supabase Auth's role when a user is deleted).
 create function private.seed_status_history()
 returns trigger
 language plpgsql
+security definer
 set search_path = ''
 as $$
 begin
@@ -202,6 +216,7 @@ $$;
 create function private.status_history_guard()
 returns trigger
 language plpgsql
+security definer
 set search_path = ''
 as $$
 declare
@@ -252,6 +267,7 @@ $$;
 create function private.status_history_sync()
 returns trigger
 language plpgsql
+security definer
 set search_path = ''
 as $$
 begin
@@ -273,14 +289,23 @@ $$;
 create function private.applications_follow_history()
 returns trigger
 language plpgsql
+security definer
 set search_path = ''
 as $$
 declare
     latest text;
 begin
+    -- This runs as the owner. If id or user_id changes there is no history to
+    -- follow (the history foreign key rejects that change otherwise), and a read
+    -- by the new values could reach another user's rows, so skip it.
+    if new.id is distinct from old.id or new.user_id is distinct from old.user_id then
+        return new;
+    end if;
+
     select h.status into latest
     from public.status_history h
     where h.application_id = new.id
+        and h.user_id = new.user_id
     order by h.status_date desc, private.status_sort_key(h.status) desc,
         h.created_at desc, h.id desc
     limit 1;
