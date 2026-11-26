@@ -224,6 +224,36 @@ The default settings row must already exist through the migration's signup trigg
 Run `pnpm test` for the foundation's automated tests and `pnpm check` for all required checks.
 Unit/integration tests use fake data and never contact the Dev or Production database.
 
+## Profile lists (issue #36)
+
+Schools, work experience and projects are repeatable profile sections. Each one has the same
+five endpoints, where `<list>` is `education`, `jobs` or `projects`:
+
+| Endpoint                         | What it does                                      |
+| -------------------------------- | ------------------------------------------------- |
+| `GET /api/profile/<list>`        | The user's items, in their saved order            |
+| `POST /api/profile/<list>`       | Adds an item at the end of the list (answers 201) |
+| `PATCH /api/profile/<list>/:id`  | Edits an item. Only the fields sent are changed   |
+| `DELETE /api/profile/<list>/:id` | Removes an item and answers `{ id }`              |
+| `PUT /api/profile/<list>/order`  | Saves a new order, all at once                    |
+
+Request bodies use the schemas in `packages/shared/src/schemas/profile-lists.ts`, with field
+names that match the database columns. A bad body answers `VALIDATION_ERROR` (400) with the
+first problem found.
+
+- `user_id`, `profile_id` and `sort_order` are set by the API. If a request sends them, they're ignored.
+- Each list holds at most 20 items (`MAX_PROFILE_LIST_ITEMS`). Adding a 21st answers 400.
+- An edit checks its dates against the saved item too, e.g. a new end date can't be before the
+  saved start date, and a job marked "currently work here" can't keep an end date.
+- Another user's item answers `NOT_FOUND` (404), never "forbidden".
+- `PUT .../order` takes `{ "ids": [...] }`: every one of the user's ids for that list, each once,
+  in the new order. Anything else (a missing, extra, repeated or someone else's id) answers 400
+  and changes nothing. On success it answers the reordered list, the same shape as `GET`.
+
+All three lists share one set of helpers in `apps/web/lib/api/profile-lists.ts`. The reorder
+runs in the `reorder_profile_list` database function (migration
+`20261126120000_reorder_profile_lists.sql`), so the order is saved in one transaction.
+
 ## Database
 
 The database runs on [Supabase](https://supabase.com). There are two projects, **Dev** and **Prod**.
